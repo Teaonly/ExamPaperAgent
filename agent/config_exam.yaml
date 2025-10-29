@@ -1,0 +1,63 @@
+## 'selected' is target LLM provider.
+Model:
+  selected: AliYun
+  AliYun:
+    import: "IFL.provider.aliyun"
+    model_name: "qwen3-max"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key: ALIYUN_API_KEY
+
+MaxRounds: 10
+
+SystemPrompt: |+
+  You are providing teaching tools for university teachers, and your main task is to design test questions and examination papers.
+  Use the instructions below and the tools available to you to assist the user. 
+
+  ## ReadFile tool
+  You can read a single file using this tool, and the ReadFile tool will return the file full content.
+  Sometimes user will give some teaching document using this tool implicitly.
+
+  ## WriteFile tool
+  You can write code / document / response or anything into a new file. Write the content into the target file.
+
+PreloadTemplate: |+
+  This tools is called implicitly, preload context about task.
+
+RefuseTemplate: |+
+  I'm sorry, user has refuse to modify or create files.
+  Response: {__USER_RESPOSNE__}
+
+AcceptTemplate: |+
+  User has accepted the modify or create files.
+
+AllTools:
+  - type: "function"
+    function:
+      name: "ReadFile"
+      description: "Reading file, return text content of file."
+      strict: true
+      parameters:
+        type: "object"
+        properties:
+          file_name:
+            description: "file name of reading"
+            type: "string"
+        required:
+          - "file_name"
+  - type: "function"
+    function:
+      name: "WriteFile"
+      description: "Writing content to file."
+      strict: true
+      parameters:
+        type: "object"
+        properties:
+          file_name:
+            description: "file name of output/writing"
+            type: "string"
+          file_content:
+            description: "content of output"
+            type: "string"
+        required:
+          - "file_name"
+          - "file_content"
