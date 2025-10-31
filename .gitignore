@@ -1,3 +1,9 @@
+# User define
+out/*
+in.docx
+out.docx
+run_error
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

@@ -14,11 +14,6 @@ endef
 export EXAMP_REQUIREMENT
 
 define GENCODE_PROMPT
-基于 Python ，采用 python-docx 库，输出 编辑考试试卷 word 文件的代码。
-
-参考功能代码，需要完成下面 TODO 内容
-
-```
 import json
 from docx import Document
 
@@ -29,8 +24,8 @@ with open('./out/试题.json', 'r', encoding='utf-8') as f:
 # 内容采用追加形式，从 'in.docx' 输入，这部分不要动
 doc = Document('in.docx')
 
-# 添加标题，TODO 根据JSON 生成合适的标题
-doc.add_heading('试题标题', level=1)
+# 添加标题，TODO 根据 JSON 生成合适的子标题
+doc.add_heading('试题标题', level=2)
 
 # 遍历试题并文档添加题目内容
 for i, q in enumerate(questions, 1):
@@ -38,11 +33,6 @@ for i, q in enumerate(questions, 1):
 
 # 保存到输出文件
 doc.save('out.docx')
-
-```
-
-根据参考代码，生成新代码文件 gen.py 
-
 endef
 export GENCODE_PROMPT
 
@@ -51,13 +41,14 @@ export GENCODE_PROMPT
 all: $(_DIR_)/试卷.docx
 clean:
 	@rm -f out/*
+	@rm -f in.docx out.docx
 
 $(_DIR_)/考试要求.txt:
 	@echo  "生成考试要求..."
 	$(file >$(_DIR_)/考试要求.txt, $(EXAMP_REQUIREMENT))
 
 .ONESHELL: $(_DIR_)/考点.txt
-$(_DIR_)/考点.txt: $(_DIR_)/考试要求.txt:
+$(_DIR_)/考点.txt: $(_DIR_)/考试要求.txt
 	@echo "请输入课程名称："
 	@read -p "=> " COURSE_NAME
 	@if [ -z "$$COURSE_NAME" ]; then echo "谢谢使用！"; exit ; fi
@@ -92,7 +83,23 @@ $(_DIR_)/问答计算题.json: $(_DIR_)/考点.txt
 
 $(_DIR_)/试卷_P1.docx: $(_DIR_)/单选题.json
 	@cp template.docx in.docx
-	$(file >$(_DIR_)/_.txt, $(GENCODE_PROMPT))
-	$(_IFL_) -i $(_DIR_)/单选题.json $^ -ti $(_DIR_)/_.txt
+	$(file >$(_DIR_)/gen_.py, $(GENCODE_PROMPT))
+	@if [ ! -f $(_DIR_)/gen.py ]; then \
+		cp $(_DIR_)/gen_.py $(_DIR_)/gen.py; \
+	fi
+	@if [ ! -f "run_error" ]; then \
+		echo "" > run_error; \
+	fi
+	ifl -y -i $(_DIR_)/单选题.json $(_DIR_)/gen.py run_error -t "修改$(_DIR_)/gen.py 文件，根据给定 JSON 试题格式，修改并且补充为完整可正确执行的代码,注意执行错误信息。" 
+	@rm -f out.docx
+	python out/gen.py 2>>run_error	
+	@if [ ! -f "out.docx" ]; then \
+		cat run_error \
+		echo "没有生成正确的 out.docx ，重试...."; \
+		make $(_DIR_)/试卷_P1.docx ; \
+	else \
+		mv out.docx $(_DIR_)/试卷_P1.docx; \
+		rm -f in.docx run_error $(_DIR_)/gen.py; \
+	fi
 
 $(_DIR_)/试卷.docx: $(_DIR_)/试卷_P1.docx
