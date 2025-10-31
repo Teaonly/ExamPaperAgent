@@ -4,17 +4,21 @@ _IFL_ = ifl -y -s ./config_exam.yaml
 
 ## 内置提示词
 define EXAMP_REQUIREMENT
-试题要求，整套试卷包括：10 道单选题（20分），10 道判断题（10分），填空题10个空（20分），5 道名词解释题目（10分）, 4 道问答或计算题（40分）。
+试题要求，整套试卷包括：10 道单选题（20分），10 道判断题（10分），填空题10个空（20分），5 道名词解释题目（10分）, 4道问答计算题（40分）。
 出题要求：
 * 同样的知识点，考察不要超过两次
 * 考题分布尽量平均，各章节都涉及到
 * 考点.txt 为需要考试内容
+* 独立出题，不参考其他
 endef
 export EXAMP_REQUIREMENT
 $(file >$(_DIR_)/考试要求.txt, $(EXAMP_REQUIREMENT))
 
-## 触发工作流
-all: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json 
+## 第一任务触发工作流
+.PHONY: clean 
+all: $(_DIR_)/试卷.docx
+clean:
+	@rm -f out/*
 
 .ONESHELL: $(_DIR_)/考点.txt
 $(_DIR_)/考点.txt:
@@ -26,12 +30,30 @@ $(_DIR_)/考点.txt:
 	mv 考点.txt $(_DIR_)/
 
 .ONESHELL: $(_DIR_)/单选题.json
-$(_DIR_)/单选题.json: $(_DIR_)/考点.txt 
-	$(_IFL_) -i $(_DIR_)/考点.txt $(_DIR_)/考试要求.txt  -t " 请相关根据要求完成单选题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '单选题.json' 文件"
+$(_DIR_)/单选题.json: $(_DIR_)/考点.txt
+	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成单选题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '单选题.json' 文件"
 	mv 单选题.json $(_DIR_)/单选题.json
 
 .ONESHELL: $(_DIR_)/判断题.json 
 $(_DIR_)/判断题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json
-	$(_IFL_) -i $(_DIR_)/考点.txt $(_DIR_)/考试要求.txt $(_DIR_)/单选题.json  -t " 请相关根据要求完成判断题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '判断题.json' 文件"
+	$(_IFL_) -i $(_DIR_)/考试要求.txt $^  -t " 请相关根据要求完成判断题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '判断题.json' 文件"
 	mv 判断题.json $(_DIR_)/判断题.json
 
+.ONESHELL: $(_DIR_)/填空题.json 
+$(_DIR_)/填空题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json 
+	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成填空题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '填空题.json' 文件"
+	mv 填空题.json $(_DIR_)/填空题.json
+
+.ONESHELL: $(_DIR_)/名词解释题.json 
+$(_DIR_)/名词解释题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json
+	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成名词解释的题目设计，出题请包含答案，使用JSON格式输出，保存为 '名词解释题.json' 文件"
+	mv 名词解释题.json $(_DIR_)/名词解释题.json
+
+.ONESHELL: $(_DIR_)/问答计算题.json 
+$(_DIR_)/问答计算题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json
+	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成名词解释的题目设计，出题请包含答案，使用JSON格式输出，保存为 '问答计算题.json' 文件"
+	mv 问答计算题.json $(_DIR_)/问答计算题.json
+
+$(_DIR_)/试卷.docx: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json  $(_DIR_)/填空题.json $(_DIR_)/名词解释题.json $(_DIR_)/问答计算题.json 
+	@echo "开始生成Word文件..."
+	touch $(_DIR_)/试卷.docx
