@@ -9,7 +9,7 @@ define EXAMP_REQUIREMENT
 * 同样的知识点，考察不要超过两次
 * 考题分布尽量平均，各章节都涉及到
 * 考点.txt 为需要考试内容
-* 独立出题，不参考其他
+* 每个题型独立出题
 endef
 export EXAMP_REQUIREMENT
 $(file >$(_DIR_)/考试要求.txt, $(EXAMP_REQUIREMENT))
@@ -35,25 +35,26 @@ $(_DIR_)/单选题.json: $(_DIR_)/考点.txt
 	mv 单选题.json $(_DIR_)/单选题.json
 
 .ONESHELL: $(_DIR_)/判断题.json 
-$(_DIR_)/判断题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json
+$(_DIR_)/判断题.json: $(_DIR_)/考点.txt 
 	$(_IFL_) -i $(_DIR_)/考试要求.txt $^  -t " 请相关根据要求完成判断题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '判断题.json' 文件"
 	mv 判断题.json $(_DIR_)/判断题.json
 
 .ONESHELL: $(_DIR_)/填空题.json 
-$(_DIR_)/填空题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json 
+$(_DIR_)/填空题.json: $(_DIR_)/考点.txt 
 	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成填空题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '填空题.json' 文件"
 	mv 填空题.json $(_DIR_)/填空题.json
 
 .ONESHELL: $(_DIR_)/名词解释题.json 
-$(_DIR_)/名词解释题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json
+$(_DIR_)/名词解释题.json: $(_DIR_)/考点.txt 
 	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成名词解释的题目设计，出题请包含答案，使用JSON格式输出，保存为 '名词解释题.json' 文件"
 	mv 名词解释题.json $(_DIR_)/名词解释题.json
 
 .ONESHELL: $(_DIR_)/问答计算题.json 
-$(_DIR_)/问答计算题.json: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json
-	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成名词解释的题目设计，出题请包含答案，使用JSON格式输出，保存为 '问答计算题.json' 文件"
+$(_DIR_)/问答计算题.json: $(_DIR_)/考点.txt 
+	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成问答计算题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '问答计算题.json' 文件"
 	mv 问答计算题.json $(_DIR_)/问答计算题.json
 
 $(_DIR_)/试卷.docx: $(_DIR_)/考点.txt $(_DIR_)/单选题.json $(_DIR_)/判断题.json  $(_DIR_)/填空题.json $(_DIR_)/名词解释题.json $(_DIR_)/问答计算题.json 
 	@echo "开始生成Word文件..."
-	touch $(_DIR_)/试卷.docx
+	$(_IFL_) -i $(_DIR_)/考点.txt $(_DIR_)/考试要求.txt -t "根据相关信息，输出Word（docx格式）试卷的Python生成代码，采用Pyhton语言，使用python-docx库，当前仅需要输出试卷的空白格式，代码保存在 gen.py 文件"
+
