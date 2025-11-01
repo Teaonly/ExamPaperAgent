@@ -50,36 +50,14 @@ $(_DIR_)/考试要求.txt:
 .ONESHELL: $(_DIR_)/考点.txt
 $(_DIR_)/考点.txt: $(_DIR_)/考试要求.txt
 	@echo "请输入课程名称："
-	@read -p "=> " COURSE_NAME
-	@if [ -z "$$COURSE_NAME" ]; then echo "谢谢使用！"; exit ; fi
-	
-	$(_IFL_) -t "请生成 $$COURSE_NAME 相关考试考点表，考点略微详细一点，按两层章节罗列，文件中包含科目名称，知识点考察点文件保存为 '考点.txt'"
+	@read -p "=> " COURSE_NAME	 
+	@if [ -z "$$COURSE_NAME" ]; then echo "谢谢使用！"; exit 1; fi 
+	$(_IFL_) -t "请生成 $$COURSE_NAME 相关考试的考点表，考点略微详细一点，按两层章节罗列，文件中包含科目名称，考点表文件保存为 '考点.txt'" 
 	mv 考点.txt $(_DIR_)/
 
-.ONESHELL: $(_DIR_)/单选题.json
-$(_DIR_)/单选题.json: $(_DIR_)/考点.txt
-	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成单选题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '单选题.json' 文件"
-	mv 单选题.json $(_DIR_)/单选题.json
-
-.ONESHELL: $(_DIR_)/判断题.json 
-$(_DIR_)/判断题.json: $(_DIR_)/考点.txt 
-	$(_IFL_) -i $(_DIR_)/考试要求.txt $^  -t " 请相关根据要求完成判断题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '判断题.json' 文件"
-	mv 判断题.json $(_DIR_)/判断题.json
-
-.ONESHELL: $(_DIR_)/填空题.json 
-$(_DIR_)/填空题.json: $(_DIR_)/考点.txt 
-	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成填空题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '填空题.json' 文件"
-	mv 填空题.json $(_DIR_)/填空题.json
-
-.ONESHELL: $(_DIR_)/名词解释题.json 
-$(_DIR_)/名词解释题.json: $(_DIR_)/考点.txt 
-	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成名词解释的题目设计，出题请包含答案，使用JSON格式输出，保存为 '名词解释题.json' 文件"
-	mv 名词解释题.json $(_DIR_)/名词解释题.json
-
-.ONESHELL: $(_DIR_)/问答计算题.json 
-$(_DIR_)/问答计算题.json: $(_DIR_)/考点.txt 
-	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关根据要求完成问答计算题的题目设计，出题请包含答案，使用JSON格式输出，保存为 '问答计算题.json' 文件"
-	mv 问答计算题.json $(_DIR_)/问答计算题.json
+$(_DIR_)/%.json: $(_DIR_)/考点.txt
+	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关要求完 $* 题目设计，出题请包含答案，使用JSON格式输出，保存为 '$*.json' 文件"
+	@mv $*.json $@
 
 $(_DIR_)/试卷_P1.docx: $(_DIR_)/单选题.json
 	@cp template.docx in.docx
