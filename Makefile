@@ -13,28 +13,7 @@ define EXAMP_REQUIREMENT
 endef
 export EXAMP_REQUIREMENT
 
-define GENCODE_PROMPT
-import json
-from docx import Document
 
-# 读取JSON试题数据，TODO 根据用户输入调整
-with open('./out/试题.json', 'r', encoding='utf-8') as f:
-    questions = json.load(f)
-
-# 内容采用追加形式，从 'in.docx' 输入，这部分不要动
-doc = Document('in.docx')
-
-# 添加标题，TODO 根据 JSON 生成合适的子标题
-doc.add_heading('试题标题', level=2)
-
-# 遍历试题并文档添加题目内容
-for i, q in enumerate(questions, 1):
-	## TODO 需要根据用户输入 JSON格式，输出题目内容到 out.docx
-
-# 保存到输出文件
-doc.save('out.docx')
-endef
-export GENCODE_PROMPT
 
 ## 第一任务触发工作流
 .PHONY: clean 
@@ -59,25 +38,18 @@ $(_DIR_)/%.json: $(_DIR_)/考点.txt
 	$(_IFL_) -i $(_DIR_)/考试要求.txt $^ -t " 请相关要求完 $* 题目设计，出题请包含答案，使用JSON格式输出，保存为 '$*.json' 文件"
 	@mv $*.json $@
 
-$(_DIR_)/试卷_P1.docx: $(_DIR_)/单选题.json
+$(_DIR_)/试卷_单选题.docx: $(_DIR_)/单选题.json
+	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
 	@cp template.docx in.docx
-	$(file >$(_DIR_)/gen_.py, $(GENCODE_PROMPT))
-	@if [ ! -f $(_DIR_)/gen.py ]; then \
-		cp $(_DIR_)/gen_.py $(_DIR_)/gen.py; \
-	fi
-	@if [ ! -f "run_error" ]; then \
-		echo "" > run_error; \
-	fi
-	ifl -y -i $(_DIR_)/单选题.json $(_DIR_)/gen.py run_error -t "修改$(_DIR_)/gen.py 文件，根据给定 JSON 试题格式，修改并且补充为完整可正确执行的代码,注意执行错误信息。" 
-	@rm -f out.docx
-	python out/gen.py 2>>run_error	
-	@if [ ! -f "out.docx" ]; then \
-		cat run_error \
-		echo "没有生成正确的 out.docx ，重试...."; \
-		make $(_DIR_)/试卷_P1.docx ; \
-	else \
-		mv out.docx $(_DIR_)/试卷_P1.docx; \
-		rm -f in.docx run_error $(_DIR_)/gen.py; \
-	fi
+	@make -f gen.mk TOPIC="单选题"
+	@mv out.docx $@
+	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
 
-$(_DIR_)/试卷.docx: $(_DIR_)/试卷_P1.docx
+$(_DIR_)/试卷_判断题.docx: $(_DIR_)/判断题.json $(_DIR_)/试卷_单选题.docx
+	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@cp $(_DIR_)/试卷_单选题.docx in.docx
+	@make -f gen.mk TOPIC="判断题"
+	@mv out.docx $@
+	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+
+$(_DIR_)/试卷.docx: $(_DIR_)/试卷_单选题.docx
