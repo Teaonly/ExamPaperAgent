@@ -43,30 +43,30 @@ $(_DIR_)/试卷_单选题.docx: $(_DIR_)/单选题.json
 	@rm -f in.docx out.docx gen.py run_error
 
 $(_DIR_)/试卷_判断题.docx: $(_DIR_)/判断题.json $(_DIR_)/试卷_单选题.docx
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 	@cp $(_DIR_)/试卷_单选题.docx in.docx
 	@make -f gen.mk TOPIC="判断题"
 	@mv out.docx $@
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 
 $(_DIR_)/试卷_填空题.docx: $(_DIR_)/填空题.json $(_DIR_)/试卷_判断题.docx
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 	@cp $(_DIR_)/试卷_判断题.docx in.docx
 	@make -f gen.mk TOPIC="填空题"
 	@mv out.docx $@
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 
 $(_DIR_)/试卷_名词解释题.docx: $(_DIR_)/名词解释题.json $(_DIR_)/试卷_填空题.docx
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 	@cp $(_DIR_)/试卷_填空题.docx in.docx
 	@make -f gen.mk TOPIC="名词解释题"
 	@mv out.docx $@
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 
 $(_DIR_)/试卷.docx: $(_DIR_)/问答计算题.json $(_DIR_)/试卷_名词解释题.docx
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 	@cp $(_DIR_)/试卷_名词解释题.docx in.docx
 	@make -f gen.mk TOPIC="问答计算题"
 	@mv out.docx $@
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 
