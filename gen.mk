@@ -26,17 +26,17 @@ export GENCODE_PROMPT
 
 all:
 	$(file >$(_DIR_)/gen_.py, $(GENCODE_PROMPT))
-	@if [ ! -f $(_DIR_)/gen.py ]; then \
-		cp $(_DIR_)/gen_.py $(_DIR_)/gen.py; \
+	@if [ ! -f gen.py ]; then \
+		cp $(_DIR_)/gen_.py gen.py; \
 	fi
 	@if [ ! -f "run_error" ]; then \
 		echo "" > run_error; \
 	fi
-	ifl -y -i $(_DIR_)/$(TOPIC).json $(_DIR_)/gen.py run_error -t "修改 $(_DIR_)/gen.py 文件，根据给定 JSON 试题格式，修改并且补充为完整可正确执行的代码,注意执行错误信息。" 
+	ifl -y -i $(_DIR_)/$(TOPIC).json run_error gen.py  -t "修改 gen.py 文件，根据给定 JSON 试题格式，修改并且补充为完整可正确执行的代码。注意：关注执行错误信息； 功能是在in.docx基础上追加试题内容；试题不要带上答案。" 
 	@rm -f out.docx
-	python out/gen.py 2>>run_error	
+	-python gen.py 2>>run_error	
 	@if [ ! -f "out.docx" ]; then \
-		cat run_error \
-		echo "没有生成正确的 out.docx ，重试...."; \
+		@cat run_error \
+		@echo "没有生成正确的 out.docx ，重试...."; \
 		make -f gen.mk TOPIC=$(TOPIC); \
 	fi

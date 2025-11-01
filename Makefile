@@ -39,11 +39,11 @@ $(_DIR_)/%.json: $(_DIR_)/考点.txt
 	@mv $*.json $@
 
 $(_DIR_)/试卷_单选题.docx: $(_DIR_)/单选题.json
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 	@cp template.docx in.docx
 	@make -f gen.mk TOPIC="单选题"
 	@mv out.docx $@
-	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
+	@rm -f in.docx out.docx gen.py run_error
 
 $(_DIR_)/试卷_判断题.docx: $(_DIR_)/判断题.json $(_DIR_)/试卷_单选题.docx
 	@rm -f in.docx out.docx $(_DIR_)/gen.py run_error
