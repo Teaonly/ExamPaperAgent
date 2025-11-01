@@ -36,7 +36,7 @@ all:
 	@rm -f out.docx
 	-python gen.py 2>>run_error	
 	@if [ ! -f "out.docx" ]; then \
-		@cat run_error \
-		@echo "没有生成正确的 out.docx ，重试...."; \
+		cat run_error \
+		echo "没有生成正确的 out.docx ，重试...."; \
 		make -f gen.mk TOPIC=$(TOPIC); \
 	fi
