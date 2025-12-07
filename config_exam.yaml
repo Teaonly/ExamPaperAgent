@@ -1,6 +1,6 @@
 ## 'selected' is target LLM provider.
 Model:
-  selected: GLM
+  selected: AliYun
   AliYun:
     import: "IFL.provider.aliyun"
     model_name: "qwen3-max"
